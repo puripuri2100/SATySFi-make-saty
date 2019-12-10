@@ -1,0 +1,13 @@
+@import: stdja
+@import: annot
+
+document (|
+  title = {テキスト出力モード};
+  author = {puripuri2100};
+  show-title = true;
+  show-toc = false;
+  package = [require `annot`];
+|) '<
+  +p{\href(`https://github.com/gfngfn/SATySFi`){SATySFi}のリポジトリです！}
+  +p{こっちは\href(`https://adventar.org/calendars/3929`){SATySFi Advent Calendar 2019}}
+>

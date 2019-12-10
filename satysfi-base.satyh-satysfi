@@ -1,0 +1,120 @@
+
+module SATySFiBase :sig
+
+  val to-tuple : string list -> string
+  val from-inline-text : text-info -> inline-text -> string
+  val from-block-text : text-info -> block-text -> string
+  val from-block-text-pro : text-info -> block-text -> string
+  val from-string : text-info -> string -> string
+  val from-bool : text-info -> bool -> string
+  val from-length : text-info -> length -> string
+  val from-color : text-info -> color -> string
+
+  val add-paren : string -> string
+  val concat : string list -> string
+
+  val make-inline-cmd : text-info -> string -> string list -> string
+  val make-block-cmd : text-info -> string -> string list -> string
+
+end = struct
+
+let to-tuple lst =
+  let join n s1 s2 =
+    if n == 0 then
+      s2
+    else
+      s1 ^ `, `# ^ s2
+  in
+    List.fold-lefti join ` ` lst
+
+
+let from-inline-text tinfo it =
+  `{` ^ stringify-inline tinfo it ^ `}`
+
+
+let from-block-text tinfo bt =
+   `<` ^ stringify-block tinfo bt ^ `>`
+
+let from-block-text-pro tinfo bt =
+   `'<` ^ stringify-block tinfo bt ^ `>`
+
+
+let from-string tinfo str =
+  let-mutable count <- 0 in
+  let-rec make-str initial n str =
+    if n <= 0 then
+      str
+    else
+      make-str initial (n - 1) (str ^ initial)
+  in
+  let-rec sub str num =
+    if (string-length str) <= 0 then
+      !count
+    else
+      let str-len = string-length str in
+      let str-head = string-sub str 0 1 in
+      let str-tail = string-sub str 1 (str-len - 1) in
+      if string-same (`` ` ``) str-head then
+        sub str-tail (num + 1)
+      else
+        if num > !count then
+          let () = count <- num in
+            sub str-tail 0
+        else
+          sub str-tail 0
+  in
+  let back-quote =
+    let n = (sub str 0) + 1 in
+      make-str (`` ` ``) n (` `)
+  in
+    back-quote ^ #` `# ^ str ^ #` `# ^ back-quote
+
+let from-int tinfo n =
+ arabic n
+
+
+let from-float tinfo fl =
+  show-float fl
+
+
+let from-bool tinfo b =
+  if b then
+    `true`
+  else
+    `false`
+
+
+let from-length tinfo len =
+  show-float (len /' 1pt) ^ `pt`
+
+
+let from-color tinfo color =
+  let to-tuple-f f lst =
+    List.map f lst |> to-tuple
+  in
+  match color with
+  | Gray(f) -> `Gray(` ^ show-float f  ^ `)`
+  | RGB(r, g, b) -> `RGB(` ^ to-tuple-f show-float [r;g;b] ^ `)`
+  | CMYK(c, m, y, k) -> `CMYK(` ^ to-tuple-f show-float [c;m;y;k] ^ `)`
+
+
+let add-paren s = `(` ^ s ^ `)`
+
+let concat = List.fold-left (^) ` `
+
+
+let make-inline-cmd tinfo name lst =
+  let info = deepen-indent 2 tinfo in
+  let str-lst = List.map add-paren lst in
+    break info ^ `\` ^ name ^ concat str-lst ^ `;` ^ break info
+
+
+let make-block-cmd tinfo name lst =
+  let info = deepen-indent 2 tinfo in
+  let str-lst = List.map add-paren lst in
+   break info ^  `+` ^ name ^ concat str-lst ^ `;` ^ break info
+
+end
+
+let require s = `@require: `# ^ s
+let import s = `@import: `# ^ s

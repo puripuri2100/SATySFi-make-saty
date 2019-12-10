@@ -1,0 +1,91 @@
+@require: list
+@require: option
+@import: satysfi-base
+
+module StdJa : sig
+
+  val document : 'a -> block-text -> string
+    constraint 'a :: (|
+      title : inline-text;
+      author : inline-text;
+      show-toc : bool;
+      show-title : bool;
+      package : string list;
+    |)
+
+  direct \ref : [string] inline-cmd
+%  direct \ref-page : [string] inline-cmd
+%  direct \figure : [inline-text; block-text] inline-cmd
+  direct +p : [inline-text] block-cmd
+  direct +pn : [inline-text] block-cmd
+%  direct +section : [string?; string?; inline-text; block-text] block-cmd
+%  direct +subsection : [string?; string?; inline-text; block-text] block-cmd
+%  direct \emph : [inline-text] inline-cmd
+
+
+end = struct
+
+
+let from-string = SATySFiBase.from-string
+let from-inline-text = SATySFiBase.from-inline-text
+let from-block-text = SATySFiBase.from-block-text
+let from-block-text-pro = SATySFiBase.from-block-text-pro
+let from-bool = SATySFiBase.from-bool
+
+let add-paren = SATySFiBase.add-paren
+let concat = SATySFiBase.concat
+
+let make-inline-cmd = SATySFiBase.make-inline-cmd
+let make-block-cmd = SATySFiBase.make-block-cmd
+
+
+let-inline tinfo \ref key =
+  make-inline-cmd tinfo `ref` [from-string tinfo key]
+
+
+let document record inner =
+  let tinfo = get-initial-text-info () in
+
+
+  let title = record#title in
+  let author = record#author in
+  let show-title = record#show-toc in
+  let show-toc = record#show-title in
+
+  let package-lst = record#package in
+
+  let head = `@require: stdja` in
+
+  let package =
+    List.fold-left (fun s1 s2 -> s1 ^ break tinfo ^ s2) ` ` package-lst 
+  in
+
+  let set =
+    concat [
+      `document (|` ^ break tinfo;
+      #`  title = `# ^ from-inline-text tinfo title ^ `;` ^ break tinfo;
+      #`  author = `# ^ from-inline-text tinfo author ^ `;` ^ break tinfo;
+      #`  show-title = `# ^ from-bool tinfo show-title ^ `;` ^ break tinfo;
+      #`  show-toc = `# ^ from-bool tinfo show-toc ^ `;` ^ break tinfo;
+      `|)`;
+    ]
+  in
+
+  let main = from-block-text-pro tinfo inner in
+
+    concat [
+      head; 
+      package;
+      break tinfo;
+      set;
+      main;
+    ]
+
+
+let-block tinfo +p it = make-block-cmd tinfo `p` [from-inline-text tinfo it]
+
+let-block tinfo +pn it = make-block-cmd tinfo `pn` [from-inline-text tinfo it]
+
+end
+
+let document = StdJa.document

@@ -1,0 +1,15 @@
+@import: satysfi-base
+
+
+module Annot :sig
+
+  direct \href : [string; inline-text] inline-cmd
+
+end = struct
+
+open SATySFiBase
+
+let-inline tinfo \href url inner =
+  make-inline-cmd tinfo `href` [from-string tinfo url; from-inline-text tinfo inner]
+
+end
