@@ -20,7 +20,7 @@ satysfi <input>.saty --text-mode "satysfi" -o <output>.html
 
 # 提供コマンド
 
-## stdjahtml.satyh-html
+## stdja.satyh-satysfi
 
 module StdJa
 
