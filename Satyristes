@@ -1,0 +1,16 @@
+;; For Satyrographos 0.0.2 series
+(version 0.0.2)
+
+(library
+  (name "make-saty")
+  (version "0.1.0")
+  (sources
+    (
+     (package "satysfi-base.satyh-saty" "./satysfi-base.satyh-satysfi")
+     (package "stdja.satyh-satysfi" "./stdja.satyh-satysfi")
+     (package "annot.satyh-satysfi" "./annot.satyh-satysfi")
+    )
+  )
+  (opam "satysfi-make-saty.opam")
+  (dependencies ())
+  (compatibility ((satyrographos "0.0.1"))))
